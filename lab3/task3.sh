@@ -1,0 +1,1 @@
+echo  " 5 * * * *  /home/user/lab1/lab3.task3.sh" | crontab
