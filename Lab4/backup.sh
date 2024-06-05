@@ -3,7 +3,7 @@ currentBackup=""
 source="/home/user/source"
 backupPath="/home/user/Backup-"$(date +%Y-%m-%d)""
 wasUpdatedOnce=0
-
+checksums="checksums.txt"
 dirs=$(ls /home/user |  grep -E "Backup")
 
 
@@ -33,6 +33,7 @@ then
   do
         echo  $source/$j >> /home/user/backup-report.txt
         cp $source/$j $backupPath
+        md5sum $source/$j >> /home/user/lab1/lab4/checksums.txt
     
   
   done
@@ -47,16 +48,23 @@ else
             then
             
             cp $source/$j $backupPath
+            md5sum $source/$j >> checksums.txt
             
             else
                 sizeOfFileInBackup=$(wc -c $backupPath/$j | awk '{print $1}')
                 sizeOfFileInSource=$(wc -c $source/$j | awk '{print $1}')
 
-                if [ $sizeOfFileInBackup != $sizeOfFileInSource ]
+                checksum_in_backup=$(awk -v filename="$source/$j" '$2 == filename {line = $0} END {print line}' "$checksums" | awk '{print $1}')
+                checksum_in_source=$(md5sum $source/$j)
+
+
+                if [[ $sizeOfFileInBackup != $sizeOfFileInSource || "$checksum_in_backup" != "$checksum_in_source" ]]
                 
                 then
                     mv $backupPath/$j  $backupPath/"$(date +%Y-%m-%d)""-"$j
                     cp $source/$j $backupPath
+                    md5sum $backupPath/$j >> /home/user/lab1/lab4/checksums.txt
+
 
                     if [ $wasUpdatedOnce == 0 ]
                     then
